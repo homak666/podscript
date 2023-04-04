@@ -95,6 +95,8 @@ for row in result:
         response = urllib.request.urlopen(req)
 
         parsed = podcastparser.parse(url, response)
+        if not parsed:
+            continue
         output_file = json_name
 
         with open(json_name, 'w', encoding='utf-8') as f:
@@ -109,6 +111,11 @@ for row in result:
     try:
         with open(json_name, 'r', encoding='utf-8') as file:
             content = file.read()
+        if not content.strip(): #skip if 0 episodes
+            print("Oopsie, 0 episoeds")
+            torch.cuda.empty_cache()
+            gc.collect()
+            continue
     except Exception as e:
         print(f'Could not open the file {json_name}', e)
     
