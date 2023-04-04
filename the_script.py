@@ -27,7 +27,7 @@ def clean_title(title):
 
 #### STEP 1. CONNECT TO DATABASE ####
 
-db_file = r"D:\\podcastindex_feeds.db"
+db_file = r"C:\Users\homak\Documents\GitHub\podscript\podcastindex_feeds.db"
 transcripts_folder = r"D:\\Transcripts"
 
 if not os.path.exists(transcripts_folder):
