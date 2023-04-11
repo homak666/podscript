@@ -76,12 +76,17 @@ for row in result:
             data = json.loads(content)
             entries = data.get('episodes', [])
             existing_episodes = []
-            for episode in entries:
-                entry = {}
-                entry['title'] = episode['title']
-                entry['url'] = episode['enclosures'][0]['url']
-                entry['published'] = episode['published']
-                existing_episodes.append(entry)
+            for entry in entries:
+                episode = {}
+                episode['title'] = entry['title']
+                enclosures = entry.get('enclosures', [])
+                if len(enclosures) > 0:
+                    episode['url'] = enclosures[0]['url']
+                else:
+                    print("Enclosures array is empty for entry:", entry)
+                    continue
+                episode['published'] = entry['published']
+                existing_episodes.append(episode)
     except Exception as e:
         print(f'Could not open or parse the file {json_name}', e)
     
@@ -127,7 +132,12 @@ for row in result:
         for entry in entries:
             episode = {}
             episode['title'] = entry['title']
-            episode['url'] = entry['enclosures'][0]['url']
+            enclosures = entry.get('enclosures', [])
+            if len(enclosures) > 0:
+                episode['url'] = enclosures[0]['url']
+            else:
+                print("Enclosures array is empty for entry:", entry)
+                continue
             episode['published'] = entry['published']
             episodes.append(episode)
     except Exception as e:
