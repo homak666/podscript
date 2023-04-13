@@ -16,6 +16,10 @@ import torch
 import whisper
 from pydub import AudioSegment
 from whisper.utils import get_writer
+import time
+
+MAX_RETRIES = 10
+RETRY_INTERVAL = 10
 
 # function for cleaning up episode name
 
@@ -152,16 +156,26 @@ for row in result:
     # Download missing episodes and add them to feed.txt file
     for episode in missing_episodes:
         try:
-            r = requests.get(episode['url'])
-            published_date = datetime.fromtimestamp(episode['published']).strftime('%Y%m%d')
-            cleaned_title = clean_title(episode['title'])
-            filename = f"{published_date}_{cleaned_title}"
-            filepath = os.path.join(folder_addr, filename)
-            with open(filepath, 'wb') as f2:
-                f2.write(r.content)
-            print(f"Downloaded {filename} for {folder}.")
+            for i in range(MAX_RETRIES):
+                try:
+                    r = requests.get(episode['url'], timeout=60)
+                    published_date = datetime.fromtimestamp(episode['published']).strftime('%Y%m%d')
+                    cleaned_title = clean_title(episode['title'])
+                    filename = f"{published_date}_{cleaned_title}"
+                    filepath = os.path.join(folder_addr, filename)
+                    with open(filepath, 'wb') as f2:
+                        f2.write(r.content)
+                    print(f"Downloaded {filename} for {folder}.")
+                    break
+                except Exception as e:
+                    print("An error occurred while downloading an episode:", e)
+                    print(f"Retrying in {RETRY_INTERVAL} seconds...")
+                    time.sleep(RETRY_INTERVAL)
+                    continue
         except Exception as e:
-            print("An error occurred while downloading an episode:", e)
+            print(f"Failed to download episode after {MAX_RETRIES} retries.")
+            gc.collect()
+            continue
             
 #### STEP 3. CONVERT AUDIO TO WAV (JUST IN CASE), THEN TO TEXT, DELETE AUDIO ####
 
