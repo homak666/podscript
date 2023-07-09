@@ -65,9 +65,11 @@ for i, (url, folder) in enumerate(fetch_podcasts(c), start=1):
 
         parsed = podcastparser.parse(url, response)
         if not parsed:
+            os.system('cls' if os.name == 'nt' else 'clear')
             continue
     except Exception as e:
         print(f'The parser could not parse the link {url}:', e)
+        os.system('cls' if os.name == 'nt' else 'clear')
         continue         
          
     # Create a new database file in the folder
